@@ -17,16 +17,14 @@ function MyApp({ Component, pageProps }) {
               Soulbond
             </a>
           </Link>
-          <Link href="/my-assets">
+          <Link href="/mySouls">
             <a className='mr-6 text-pink-500'>
               My souls
             </a>
           </Link>
-          <Link href="/my-assets">
-            <a className='mr-6 text-pink-500'>
-              Search
-            </a>
-          </Link>
+          <a className='mr-6 text-pink-500'>
+            Search
+          </a>
         </div>
       </nav>
       <Component {...pageProps} />
