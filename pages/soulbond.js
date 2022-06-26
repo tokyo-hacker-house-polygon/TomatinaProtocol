@@ -18,7 +18,7 @@ export default function Soulbonding () {
     const router = useRouter()
 
     async function onChange(e) {
-        const file = e.target.files[0]
+        const file = e.target.files[0];
         try {
             const added = await client.add(
                 file,
@@ -78,7 +78,7 @@ export default function Soulbonding () {
                 <input 
                     placeholder="To address"
                     className='mt-2 border rounded p-4'
-                    onChange={e => updateFormInput({ ...formInput, bondwith: e.target.value })}
+                    onChange={e => updateFormInput({ ...formInput, toAddr: e.target.value })}
                 />
                 <input 
                     type="file"

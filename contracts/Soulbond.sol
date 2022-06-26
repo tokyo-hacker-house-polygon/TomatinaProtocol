@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.6;
 
-import {ERC4973} from "./ERC4973.sol";
+import {implementationOfEip5114} from "./implementEIP5114.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract Soulbond is  ERC4973{
+contract Soulbond is  implementationOfEip5114{
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
     uint public tokenCount;
-    bool show;
     address from;
 
     struct Soul {
@@ -19,8 +18,9 @@ contract Soulbond is  ERC4973{
     }
 
     mapping(uint256 => Soul) private idToSoul;
+    mapping(address => string) private addrToPubkey;
 
-    constructor() ERC4973("Soulbond Token", "SOUL") {}
+    constructor() implementationOfEip5114("Soulbond Token", "SOUL") {}
 
     function _setYourSoul(uint256 _tokenId, bool _show) public {
         idToSoul[_tokenId].show = _show;
@@ -38,6 +38,11 @@ contract Soulbond is  ERC4973{
         _mint(_to, tokenCount, _tokenURI);
 
         return tokenCount;
+    }
+
+    function getSender(uint _tokenId) public view returns (address sender) {
+        require(idToSoul[_tokenId].owner != address(0), "This token doesn't exist");
+        return idToSoul[_tokenId].sender;
     }
 
     function fetchYourSouls() public view returns (Soul[] memory) {
@@ -61,5 +66,13 @@ contract Soulbond is  ERC4973{
             }
         }
         return souls;
+    }
+
+    function setPubKey(string memory _pubKey) public {
+        addrToPubkey[msg.sender] = _pubKey;
+    }
+
+    function getPubkey(address _to) public view returns (string memory pubKey) {
+        return addrToPubkey[_to];
     }
 }

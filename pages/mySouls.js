@@ -18,25 +18,32 @@ export default function MySouls() {
     }, [])
 
     async function loadSouls() {
+        console.log(1)
         const web3Modal = new Web3Modal({
-            network: "mainnet",
             cacheProvider: true,
         })
+        console.log(2)
         const connection = await web3Modal.connect()
         const provider = new ethers.providers.Web3Provider(connection)
         const signer = provider.getSigner()
-
+        console.log(3)
         const soulContract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
         const data = await soulContract.fetchYourSouls()
-
+        console.log(4)
+        console.log(data)
         const souls = await Promise.all(data.map(async i => {
-            const tokenUri = await soulContract.tokenURI(i.tokenId)
+            console.log(5)
+            const tokenUri = await soulContract.tokenURI(i.soulId)
+            console.log(6)
             const meta = await axios.get(tokenUri)
+            console.log(typeof(i.sender))
+            console.log(typeof(i.owner))
             let soul = {
-                tokenId: i.tokenId.toNumber(),
+                soulId: i.soulId.toNumber(),
                 sender: i.sender,
                 owner: i.owner,
                 image: meta.data.image,
+                description: meta.data.description,
             }
             return soul
         }))
@@ -51,9 +58,15 @@ export default function MySouls() {
             <div className='p-4'>
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4'>
                 {
-                    souls.map((nft, i) => (
+                    souls.map((soul, i) => (
                         <div key={i} className="border shadow rounded-xl overflow-hidden">
                             <img src={soul.image} className="rounded" />
+                            <div className="p-4">
+                                <p className="text-2xl text-black">{soul.description}</p>
+                            </div>
+                            <div className="p-4">
+                                <p className="text-2xl text-black">from {soul.sender}</p>
+                            </div>
                         </div>
                     ))
                 }
