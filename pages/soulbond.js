@@ -4,6 +4,8 @@ import { create as ipfsHttpClient } from 'ipfs-http-client'
 import { useRouter } from 'next/router'
 import Web3Modal from 'web3modal'
 
+const Cryptico = require('cryptico')
+
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
 
 import {
@@ -28,18 +30,24 @@ export default function Soulbonding () {
             )
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
             setFileUrl(url)
-        } catch(e) {
-            console.log(e)
+        } catch (error) {
+            console.log('Error uploading file: ', error)
         }
     }
 
     async function createSoul() {
-        const { name, description, toAddr } = formInput
+        console.log(1)
+        const descript = await encryptDesc(formInput.description, formInput.toAddr)
+        console.log(descript)
+        const name = formInput.name
+        const description = descript.cipher
+        const toAddr = formInput.toAddr
+        console.log(description)
         if (!name || !description || !toAddr || !fileUrl) return
         const data = JSON.stringify({
             name, description, toAddr, image: fileUrl
         })
-
+        console.log(3)
         try {
             const added = await client.add(data)
             const url = `https://ipfs.infura.io/ipfs/${added.path}`
@@ -51,6 +59,9 @@ export default function Soulbonding () {
     }
 
     async function soulBond(to, url) {
+        console.log(111)
+        console.log(to)
+        console.log(url)
         const web3Modal = new Web3Modal()
         const connection = await web3Modal.connect()
         const provider = new ethers.providers.Web3Provider(connection)
@@ -61,6 +72,33 @@ export default function Soulbonding () {
         await transaction.wait()
         router.push('/')
     }
+
+    async function encryptDesc(descript, address){
+        const web3Modal = new Web3Modal({
+            cacheProvider: true,
+          })
+          
+        const connection = await web3Modal.connect()
+        const provider = new ethers.providers.Web3Provider(connection)
+        const signer = provider.getSigner()
+        const soulContract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
+        const data = await soulContract.getPubKey(address)
+        const key = await Promise.all(data.map(async i => {
+            let key = {
+                keyId: i.keyId.toNumber(),
+                owner: i.owner,
+                publicKey: i.publicKey,
+            }
+            return key.publicKey
+        }))
+        console.log(key)
+
+        const encrypting = await Cryptico.encrypt(descript, key[0])
+        return encrypting
+
+    }
+
+
 
     return (
         <div className='flex justify-center'>

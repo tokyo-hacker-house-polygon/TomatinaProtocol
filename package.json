@@ -14,13 +14,16 @@
     "@openzeppelin/contracts": "^4.6.0",
     "axios": "^0.27.2",
     "chai": "^4.3.6",
+    "cryptico": "^1.0.2",
     "ethereum-waffle": "^3.4.4",
     "ethers": "^5.6.9",
     "hardhat": "^2.9.9",
-    "ipfs-http-client": "^57.0.1",
+    "ipfs-http-client": "^57.0.3",
     "next": "12.1.6",
+    "node-rsa": "^1.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-router-dom": "^6.3.0",
     "web3modal": "^1.9.8"
   },
   "devDependencies": {

@@ -6,7 +6,7 @@ import {ERC165} from "./ERC165.sol";
 import {IERC721Metadata} from "./interfaces/IERC721Metadata.sol";
 import {IImplementationOfEip5114} from "./interfaces/IImplementationOfEip5114.sol";
 
-abstract contract implementationOfEip5114 is ERC165, IERC721Metadata, IImplementationOfEip5114 {
+abstract contract implementationOfEip5114_2 is ERC165, IERC721Metadata, IImplementationOfEip5114 {
     string private _name;
     string private _symbol;
 
@@ -57,24 +57,12 @@ abstract contract implementationOfEip5114 is ERC165, IERC721Metadata, IImplement
         return _owners[tokenId] != address(0);
     }
 
-    function _mint(
-        address _to,
-        uint256 tokenId,
-        string memory uri
-    ) internal virtual returns (uint256) {
-        require(!_exists(tokenId), "mint: tokenID exists");
-        _balances[_to] += 1;
-        _owners[tokenId] = _to;
-        _tokenURIs[tokenId] = uri;
-        emit Mint(_to, tokenId);
-        return tokenId;
-    }
     function _mintPub(
         address _to,
         uint256 tokenId,
         string memory uri
     ) internal virtual returns (uint256) {
-        require(!_exists(tokenId), "mintPub: tokenID exists");
+        require(!_exists(tokenId), "mint: tokenID exists");
         _balances[_to] += 1;
         _owners[tokenId] = _to;
         _tokenURIs[tokenId] = uri;
