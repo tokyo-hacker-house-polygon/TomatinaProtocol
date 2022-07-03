@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Profiler } from 'react';
 
-const Navigation = ({web3Handler, account, publicKey}) => {
+const Navigation = ({web3Handler, account, profile, publicKey}) => {
+    console.log("hello", profile)
     return(
         <nav className="border-b p-6 bg-black">
         <p className="text-4xl font-bold text-pink-700">Soulbound Protocol</p>
@@ -25,30 +27,21 @@ const Navigation = ({web3Handler, account, publicKey}) => {
             Search
           </a>
           </Link>
-          <a className='p-1 mr-6 text-pink-500'>
-            {publicKey}
-          </a>
-
           {account ? publicKey.length ?(
-            <Link href = {`https://etherscan.io/address/${account}`}>
                 <button className="font-bold ml-2 bg-pink-400 text-black rounded p-2">
-                    {account.slice(0, 5) + '...' + account.slice(38, 42)}
+                    {profile}
                 </button>
-            </Link>
 
           ) : (
-            <Link href="">
               <button className="font-bold ml-2 bg-pink-400 text-black rounded p-2">
                     create keys
                 </button>
-            </Link>
           ) : (
             <button onClick={web3Handler} className="font-bold ml-2 bg-pink-400 text-black rounded p-2">
                 Connect Wallet
             </button>
 
           )
-
           }
         </div>
       </nav>

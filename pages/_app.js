@@ -17,11 +17,17 @@ import {
   soulbondAddress
 } from '../config'
 
+import { GET_DEFAULT_PROFILES, GET_DEFAULT_PROFILES_FROM_ADDRESS } from "./api/api"
+import Image from 'next/image'
+import { apolloClient } from '../apollo-client';
+import { gql } from '@apollo/client'
+
 import Soulbond from '../artifacts/contracts/Soulbond.sol/Soulbond.json'
 
 
 function MyApp({ Component, pageProps }) {
   const [account, setAccount] = useState(null)
+  const [profile, setProfile] = useState("")
   const [loading, setLoading] = useState(true)
   const [searchAddress, setSearchAddress] = useState("")
   const [publicKey, setPublicKey] = useState("")
@@ -57,6 +63,24 @@ function MyApp({ Component, pageProps }) {
       }
       return key.publicKey
     }))
+    console.log(accounts[0])
+    let name
+      try {
+        const response = await  apolloClient.query({
+            query: gql(GET_DEFAULT_PROFILES),
+            variables: {
+                request: 
+                    { ethereumAddress: accounts[0]}
+            },
+          })
+        console.log("response", response)
+        name = response.data.defaultProfile.handle.toString()
+        console.log(name)
+        console.log(typeof(name))
+    } catch (err) {
+        console.log("error fetching profile...", err)
+    }
+    setProfile(name)
     setPublicKey(key)
     setLoading(false)
   }
@@ -64,7 +88,7 @@ function MyApp({ Component, pageProps }) {
   return (
     <div>
       <>
-        <Navigation web3Handler={web3Handler} account={account} publicKey={publicKey}/>
+        <Navigation web3Handler={web3Handler} account={account} profile={profile} publicKey={publicKey}/>
       </>
 
       {!loading ? publicKey.length ?(

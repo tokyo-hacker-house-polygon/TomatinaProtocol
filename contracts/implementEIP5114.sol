@@ -14,6 +14,10 @@ abstract contract implementationOfEip5114 is ERC165, IERC721Metadata, IImplement
     mapping (uint256 => string) private _tokenURIs;
     mapping (address => uint256) private _balances;
 
+    mapping (uint256 => address) private _ownersPub;
+    mapping (uint256 => string) private _tokenURIsPub;
+    mapping (address => uint256) private _balancesPub;
+
     constructor (
         string memory name_,
         string memory symbol_
@@ -57,6 +61,10 @@ abstract contract implementationOfEip5114 is ERC165, IERC721Metadata, IImplement
         return _owners[tokenId] != address(0);
     }
 
+    function _existsPub(uint256 tokenId) internal view virtual returns (bool) {
+        return _owners[tokenId] != address(0);
+    }
+
     function _mint(
         address _to,
         uint256 tokenId,
@@ -74,11 +82,11 @@ abstract contract implementationOfEip5114 is ERC165, IERC721Metadata, IImplement
         uint256 tokenId,
         string memory uri
     ) internal virtual returns (uint256) {
-        require(!_exists(tokenId), "mintPub: tokenID exists");
-        _balances[_to] += 1;
-        _owners[tokenId] = _to;
-        _tokenURIs[tokenId] = uri;
-        emit Mint(_to, tokenId);
+        require(!_existsPub(tokenId), "mintPub: tokenID exists");
+        _balancesPub[_to] += 1;
+        _ownersPub[tokenId] = _to;
+        _tokenURIsPub[tokenId] = uri;
+        emit MintPub(_to, tokenId);
         return tokenId;
     }
 }

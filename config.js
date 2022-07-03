@@ -1,3 +1,3 @@
 
-  export const soulbondAddress = "0x95401dc811bb5740090279Ba06cfA8fcF6113778"
+  export const soulbondAddress = "0x51073b7514F31faFd1F08EAc2DD36353a4f46837"
   

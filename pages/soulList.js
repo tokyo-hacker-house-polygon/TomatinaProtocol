@@ -15,7 +15,6 @@ import Soulbond from "../artifacts/contracts/Soulbond.sol/Soulbond.json"
 export default function SoulsList({searchAddress,setSearchAddress}) {
     const [souls, setSouls] = useState([])
     const [loadingState, setLoadingState] = useState('not-loaded')
-    const [seedPhrase, setSeedPhrase] = useState("")
     const [dispDescription, setDispDescription] = useState([])
     const [nextAddress, setNextAddress] = useState(null)
 
@@ -101,16 +100,6 @@ export default function SoulsList({searchAddress,setSearchAddress}) {
                             <div className="p-1 border">
                                 <p className='text-2xl text-black'>Description : </p>
                                 <p className="text-lg text-black">{dispDescription[i]}</p>
-                            </div>
-                            <div className="p-1">
-                                <p>seed phrase</p>
-                                <input type="text" className='p-2 rounded-md' onChange={e => setSeedPhrase(e.target.value)}/>
-                                <button 
-                                    className='p-2 ml-3 text-white bg-black rounded-md'
-                                    onClick={a => decrypt(i,seedPhrase)}
-                                >
-                                    go 
-                                </button>
                             </div>
                             <div className="p-1">
                                 <p className='text-2xl text-black'>From : </p>

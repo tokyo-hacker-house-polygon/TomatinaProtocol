@@ -16,10 +16,10 @@ import Soulbond from '../artifacts/contracts/Soulbond.sol/Soulbond.json'
 
 export default function MySouls({searchAddress,setSearchAddress}) {
     const [souls, setSouls] = useState([])
+    const [pubSouls, setPubSouls] = useState([])
     const [loadingState, setLoadingState] = useState('not-loaded')
     const [seedPhrase, setSeedPhrase] = useState("")
     const [dispDescription, setDispDescription] = useState([])
-    const [fileUrl, setFileUrl] = useState(null)
 
     useEffect(() => {
         loadSouls()
@@ -34,7 +34,8 @@ export default function MySouls({searchAddress,setSearchAddress}) {
         const signer = provider.getSigner()
         const soulContract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
         const data = await soulContract.fetchYourSouls()
-        console.log(data)
+        const data2 = await soulContract.fetchYourPubSouls()
+
         const souls = await Promise.all(data.map(async i => {
             const tokenUri = await soulContract.tokenURI(i.soulId)
             const meta = await axios.get(tokenUri)
@@ -53,11 +54,30 @@ export default function MySouls({searchAddress,setSearchAddress}) {
         const descriptions = await Promise.all(data.map(async i => {
             const tokenUri = await soulContract.tokenURI(i.soulId)
             const meta = await axios.get(tokenUri)
-            let description = meta.data.description
+            let description = meta.data.description;
             return description
         }))
+
+        const pubsouls = await Promise.all(data2.map(async i => {
+            let soul = {
+                soulId: i.soulId.toNumber(),
+                sender: i.sender,
+                owner: i.owner,
+                image: i.img,
+                name: i.name,
+                description: i.description,
+                valText: "aa",
+            }
+            return soul
+        }))
+
+        console.log(1111)
+        console.log(pubsouls)
+
         setSouls(souls)
+        setPubSouls(pubsouls)
         setDispDescription(descriptions)
+        console.log(dispDescription)
         setLoadingState('loaded')
     }
 
@@ -71,8 +91,10 @@ export default function MySouls({searchAddress,setSearchAddress}) {
         const decriptionResult = await Cryptico.decrypt(dispDescription[i],privatekey)
         console.log("Start")
         console.log(decriptionResult)
+        console.log(decriptionResult.plaintext)
         console.log(i)
         setDispDescription((prevState) => prevState.map((value,index)=>(index === i ? decriptionResult.plaintext : value)))
+        console.log("hi", dispDescription[i])
 
     }
 
@@ -82,55 +104,47 @@ export default function MySouls({searchAddress,setSearchAddress}) {
         const toAddr = souls[i].sender
         const file = souls[i].image
 
-        try {
-            const added = await client.add(
-                file,
-                {
-                    progress: (prog) => console.log(`received: ${prog}`)
-                }
-            )
-            const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            setFileUrl(url)
-        } catch (error) {
-            console.log('Error uploading file: ', error)
-        }
         console.log(name)
         console.log(description)
         console.log(toAddr)
-        console.log(fileUrl)
+        console.log(file)
 
-        if (!name || !description || !toAddr || !fileUrl) return
-        const data = JSON.stringify({
-            name, description, toAddr, image: fileUrl
-        })
-
-        console.log(1)
-        try {
-            const added = await client.add(data)
-            const url = `https://ipfs.infura.io/ipfs/${added.path}`
-            const to = toAddr
-            pubSoulBond(to, url)
-        } catch (error) {
-            console.log('Error uploading file: ', error)
-        }
-
-    }
-
-    async function pubSoulBond(to, url) {
-        console.log(2)
-        console.log(url)
         const web3Modal = new Web3Modal()
         const connection = await web3Modal.connect()
         const provider = new ethers.providers.Web3Provider(connection)
         const signer = provider.getSigner()
+        const soulContract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
 
-        let contract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
-        console.log(3)
-        let transaction = await contract.mint(to, url)
         console.log(4)
-        await transaction.wait()
-        
+        await soulContract.setPubSoul(toAddr,file,description,name)
+        console.log(5)
     }
+
+    async function validate(i) {
+        const web3Modal = new Web3Modal()
+        const connection = await web3Modal.connect()
+        const provider = new ethers.providers.Web3Provider(connection)
+        const signer = provider.getSigner()
+        const soulContract = new ethers.Contract(soulbondAddress, Soulbond.abi, signer)
+        const data = await soulContract.getPubKey(pubSouls[i].sender)
+
+        const key = await Promise.all(data.map(async i => {
+            let key = {
+                keyId: i.keyId.toNumber(),
+                owner: i.owner,
+                publicKey: i.publicKey,
+            }
+            return key.publicKey
+        }))
+
+        
+        console.log(key[0])
+        console.log(pubSouls[i].description)
+        pubSouls[i].valText = Cryptico.encrypt(pubSouls[i].description, key[0]).cipher
+        console.log(pubSouls[i].valText)
+    }
+
+
 
 
     if (loadingState === 'loaded' && !souls.length) return (
@@ -139,6 +153,35 @@ export default function MySouls({searchAddress,setSearchAddress}) {
     return (
         <div className='flex justify-center'>
             <div className='p-4'>
+            <p className="text-4xl">public</p>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4'>
+                {
+                    pubSouls.map((soul, i) => (
+                        <div key={i} className="border shadow rounded-xl overflow-hidden bg-pink-300">
+                            <img src={soul.image} className="rounded" />
+                            <div className="p-4">
+                                <p className='text-2xl text-black'>Description : </p>
+                                <p className="text-2xl text-black">{soul.description}</p>
+                            </div>
+                            
+
+                            <div className="p-4">
+                                <p className="text-2xl text-black">From :</p>
+                                <button 
+                                    onClick={a => setSearchAddress(soul.sender)}
+                                    className='bg-pink-800 text-white p-3 rounded-md'
+                                >
+                                    {soul.sender.slice(0, 10) + '...' + soul.sender.slice(32, 42)}
+                                </button>
+                                <Link href="/soulList">
+                                    <button className='p-2 ml-3 text-white bg-black rounded-md'>go</button>
+                                </Link>
+                            </div>
+                        </div>
+                    ))
+                }
+                </div>
+                <p className="text-4xl">encrypt</p>
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4'>
                 {
                     souls.map((soul, i) => (
@@ -146,7 +189,8 @@ export default function MySouls({searchAddress,setSearchAddress}) {
                             <img src={soul.image} className="rounded" />
                             <div className="p-4">
                                 <p className='text-2xl text-black'>Description : </p>
-                                <p className="text-2xl text-black">{dispDescription[i]}</p>
+                                    <p className="text-2xl text-black">{dispDescription[i]}</p>
+                                
                             </div>
                             <div className="p-1">
                                 <p>seed phrase</p>
@@ -155,13 +199,11 @@ export default function MySouls({searchAddress,setSearchAddress}) {
                                     className='p-2 ml-3 text-white bg-black rounded-md'
                                     onClick={a => decrypt(i,seedPhrase)}
                                 >
-                                    go 
+                                    go
                                 </button>
                             </div>
 
                             <div className="p-1">
-                                <p>seed phrase</p>
-                                <input type="text" className='p-2 rounded-md' onChange={e => setSeedPhrase(e.target.value)}/>
                                 <button 
                                     className='p-2 ml-3 text-white bg-black rounded-md'
                                     onClick={a => publishSoul(i)}
@@ -185,6 +227,7 @@ export default function MySouls({searchAddress,setSearchAddress}) {
                     ))
                 }
                 </div>
+                
             </div>
         </div>
     )

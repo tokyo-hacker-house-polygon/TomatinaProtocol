@@ -12,7 +12,7 @@ import {
 
 import Soulbond from '../artifacts/contracts/Soulbond.sol/Soulbond.json'
 
-export default function generateKey({searchAddress,setSearchAddress}) {
+export default function useGenerateKey({searchAddress,setSearchAddress}) {
     const [genPubKey, setGenPubKey] = useState("122")
     const [seedWord, setSeedWord] = useState("aa")    
     

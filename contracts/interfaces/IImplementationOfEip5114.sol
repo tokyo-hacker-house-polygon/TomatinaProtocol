@@ -6,6 +6,7 @@ pragma solidity ^0.8.6;
 
 interface IImplementationOfEip5114 {
     event Mint (address indexed to, uint256 indexed tokenId);
+    event MintPub (address indexed to, uint256 indexed tokenId);
 
     function balanceOf(address owner) external view returns (uint256);
 
